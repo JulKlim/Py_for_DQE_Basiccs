@@ -1,12 +1,13 @@
 import datetime
 import os
+import json
 class NewsFeedContent:
     def __init__(self):
         self.content_type = None
 
     def choose_content_type(self):
-        print('Please select the content type\n 1. News \n 2. Private Advertisment\n 3. Fun fact of the day\n 4. Take content from the file\n')
-        self.content_type = input("Enter the number of the content (1, 2, 3 or 4):\n")
+        print('Please select the content type\n 1. News \n 2. Private Advertisment\n 3. Fun fact of the day\n 4. Take content from the file\n 5. Json Input\n')
+        self.content_type = input("Enter the number of the content (1, 2, 3, 4 or 5):\n")
         if self.content_type == '1':
          self.content_type = "News"
         elif self.content_type == '2':
@@ -15,8 +16,10 @@ class NewsFeedContent:
             self.content_type = "Fun fact of the day"
         elif self.content_type == '4':
             self.content_type = "File Input"
+        elif self.content_type == '5':
+            self.content_type = "Json Input"
         else:
-            print("Incorrect choice of the content type. Plese enter '1', '2', '3' or '4'")
+            print("Incorrect choice of the content type. Plese enter '1', '2', '3', '4' or '5'")
             self.choose_content_type()
 
     def write_content(self):
@@ -103,6 +106,31 @@ class InputFile(NewsFeedContent):
                 print(f"File '{self.file_path}' not found.")
      else: os.remove(self.file_path)
 
+class InputJson(NewsFeedContent):
+    def __init__(self, file_path):
+        super().__init__()
+        self.file_path = file_path
+
+    def publish_content(self):
+     try:
+        with open(self.file_path, 'r') as json_file:
+            with open("NewsFeed.txt", "a") as file_writing:
+              data = json.load(json_file)
+              news = data["news"]
+              for item in news:
+                  if item["type"]=="News":
+                      date = datetime.datetime.today()
+                      file_writing.write(item["type"] + " " + "----------------------------------\n")
+                      file_writing.write(item["text"] + "\n")
+                      file_writing.write(item["city"] + f" {date.strftime('%x')}, {date.strftime('%H.%M')} \n")
+                  if item["type"]=="Fact":
+                      file_writing.write("Fun fact of the day-------------------\n")
+                      file_writing.write(item["text"] + "\n")
+                      file_writing.write(item["rate"] + "/10")
+     except FileNotFoundError:
+                print(f"File '{self.file_path}' not found.")
+     else: os.remove(self.file_path)
+
 if __name__ == "__main__":
     newContent = NewsFeedContent()
     newContent.choose_content_type()
@@ -121,4 +149,7 @@ if __name__ == "__main__":
     elif newContent.content_type == "File Input":
         file_input = InputFile("C:/Users/Yulia_Klimova/Python for DQE Basics/pythonProject/PyForDQE/News_to_read.txt")
         file_input.publish_content()
+    elif newContent.content_type == "Json Input":
+        json_input = InputJson("C:/Users/Yulia_Klimova/Python for DQE Basics/pythonProject/PyForDQE/json_to_read.json")
+        json_input.publish_content()
 

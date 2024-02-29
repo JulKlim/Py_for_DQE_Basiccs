@@ -1,0 +1,14 @@
+{
+  "news": [
+    {
+      "type": "News",
+      "text": "An earthquake happened in the south part of the country.",
+      "city": "Tokio"
+    },
+    {
+      "type": "Fact",
+      "text": "Bananas are berries.",
+      "rate": "6"
+    }
+  ]
+}
