@@ -1,13 +1,14 @@
 import datetime
 import os
 import json
+import xml.etree.ElementTree as ET
 class NewsFeedContent:
     def __init__(self):
         self.content_type = None
 
     def choose_content_type(self):
-        print('Please select the content type\n 1. News \n 2. Private Advertisment\n 3. Fun fact of the day\n 4. Take content from the file\n 5. Json Input\n')
-        self.content_type = input("Enter the number of the content (1, 2, 3, 4 or 5):\n")
+        print('Please select the content type\n 1. News \n 2. Private Advertisment\n 3. Fun fact of the day\n 4. Take content from the file\n 5. Json Input\n 6. Xml Input\n')
+        self.content_type = input("Enter the number of the content (1, 2, 3, 4, 5 or 6):\n")
         if self.content_type == '1':
          self.content_type = "News"
         elif self.content_type == '2':
@@ -18,8 +19,10 @@ class NewsFeedContent:
             self.content_type = "File Input"
         elif self.content_type == '5':
             self.content_type = "Json Input"
+        elif self.content_type == '6':
+            self.content_type = "XML Input"
         else:
-            print("Incorrect choice of the content type. Plese enter '1', '2', '3', '4' or '5'")
+            print("Incorrect choice of the content type. Plese enter '1', '2', '3', '4', '5' or '6'")
             self.choose_content_type()
 
     def write_content(self):
@@ -92,7 +95,6 @@ class InputFile(NewsFeedContent):
         super().__init__()
         self.file_path = file_path
 
-
     def publish_content(self):
      try:
         with open(self.file_path, 'r') as file:
@@ -131,6 +133,29 @@ class InputJson(NewsFeedContent):
                 print(f"File '{self.file_path}' not found.")
      else: os.remove(self.file_path)
 
+class XmlInput(NewsFeedContent):
+    def __init__(self, file_path):
+        super().__init__()
+        self.file_path = file_path
+
+    def publish_content(self):
+        try:
+            with open(self.file_path, 'r') as xmlFile:
+                with open("NewsFeed.txt", "a") as file_writing:
+                  xmlContent = ET.parse(xmlFile).getroot()
+                  for news_item in xmlContent.findall("news_item"):
+                   for type in news_item.iter("type"):
+                     if type.text=="News":
+                         date = datetime.datetime.today()
+                         file_writing.write(type.text + " " + "----------------------------------\n")
+                     for text in news_item.iter("text"):
+                       file_writing.write(text.text + "\n")
+                     for city in news_item.iter("city"):
+                        file_writing.write(city.text + f" {date.strftime('%x')}, {date.strftime('%H.%M')} \n")
+        except FileNotFoundError:
+            print(f"File '{self.file_path}' not found.")
+        else: os.remove(self.file_path)
+
 if __name__ == "__main__":
     newContent = NewsFeedContent()
     newContent.choose_content_type()
@@ -152,4 +177,7 @@ if __name__ == "__main__":
     elif newContent.content_type == "Json Input":
         json_input = InputJson("C:/Users/Yulia_Klimova/Python for DQE Basics/pythonProject/PyForDQE/json_to_read.json")
         json_input.publish_content()
+    elif newContent.content_type == "XML Input":
+        xml_input = XmlInput("C:/Users/Yulia_Klimova/Python for DQE Basics/pythonProject/PyForDQE/news.xml")
+        xml_input.publish_content()
 
